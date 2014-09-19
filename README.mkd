@@ -1,4 +1,4 @@
 # Beni code highlighter.
 
-Beni is **pygments.rb** compatible code highlighter, written by pure golang.
+Beni is **Pygments** compatible code highlighter, written by pure golang.
 And it refer **rouge** for Ruby.
