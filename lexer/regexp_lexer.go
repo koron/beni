@@ -11,7 +11,7 @@ type RegexpLexerContext interface {
 	Emit(t token.Code, s string) error
 	Push(s RegexpLexerState) error
 	Pop() error
-	Delegate(l Lexer, s string) error
+	ParseStr(str string) error
 }
 
 type RegexpBehavior func(c RegexpLexerContext, groups []string) error
@@ -61,10 +61,11 @@ type RegexpLexer struct {
 	Info Info
 }
 
-func NewRegexpLexer(d *RegexpLexerData) *RegexpLexer {
+func NewRegexpLexer(d *RegexpLexerData) (*RegexpLexer, error) {
+	// TODO:
 	return &RegexpLexer{
 		Info: d.Info,
-	}
+	}, nil
 }
 
 func (l *RegexpLexer) GetInfo() Info {

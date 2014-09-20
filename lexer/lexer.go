@@ -25,6 +25,6 @@ type Lexer interface {
 }
 
 type Factory interface {
-	GetInfo() Info
-	New() Lexer
+	Info() Info
+	New() (Lexer, error)
 }
