@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/koron/beni/token"
 	"regexp"
+	"unicode/utf8"
 )
 
 type RegexpLexerContext interface {
@@ -52,7 +53,7 @@ type RegexpLexerRule struct {
 func (r RegexpLexerRule) Convert() (*regexpRule, error) {
 	rx, err := regexp.Compile(r.Pattern)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%v: %s", err, r.Pattern)
 	}
 	return &regexpRule{regexp: rx, action: r.Action}, nil
 }
@@ -76,7 +77,7 @@ type RegexpLexerDef struct {
 
 type regexpRule struct {
 	regexp *regexp.Regexp
-	action  RegexpAction
+	action RegexpAction
 }
 
 func (r *regexpRule) match(s string) []string {
@@ -89,7 +90,7 @@ type RegexpLexer struct {
 }
 
 func NewRegexpLexer(d *RegexpLexerDef) (*RegexpLexer, error) {
-	var states map[RegexpLexerState][]*regexpRule
+	states := make(map[RegexpLexerState][]*regexpRule)
 	for s, r := range d.States {
 		rules, err := regexpConvertRules(r)
 		if err != nil {
@@ -175,6 +176,7 @@ func (c *regexpLexerContext) currentState() RegexpLexerState {
 }
 
 func (c *regexpLexerContext) parse(s string) error {
+ParseLoop:
 	for true {
 		rules := c.lexer.Rules(c.currentState())
 		if rules == nil {
@@ -185,11 +187,18 @@ func (c *regexpLexerContext) parse(s string) error {
 			if m == nil {
 				continue
 			}
+			if len(m[0]) == 0 {
+				return errors.New("matched with empty")
+			}
 			if err := rule.action(c, m); err != nil {
 				return err
 			}
 			s = s[len(m[0]):]
+			continue ParseLoop
 		}
+		// forward pointer if no rules matched.
+		_, n := utf8.DecodeRuneInString(s)
+		s = s[n:]
 	}
 	return nil
 }

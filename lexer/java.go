@@ -101,7 +101,7 @@ var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 			Action:  RegexpEmit(LiteralString),
 		},
 		RegexpLexerRule{
-			Pattern: "'(?:\\.|[^\\]|\\u[0-9a-fA-F]{4})'",
+			Pattern: "'(?:\\.|[^\\]|\\\\u[0-9a-fA-F]{4})'",
 			Action:  RegexpEmit(LiteralStringChar),
 		},
 		RegexpLexerRule{

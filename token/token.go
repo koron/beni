@@ -208,21 +208,21 @@ var Tokens = []Token{
 }
 
 // Map of code to token.
-var Table map[Code]Token
+var Table = make(map[Code]Token)
 
 func init() {
-	for _, td := range Tokens {
-		Table[td.Code] = td
+	for _, t := range Tokens {
+		Table[t.Code] = t
 	}
 }
 
 // ToName returns name of the token.
 func ToName(c Code) (string, bool) {
-	td, ok := Table[c]
+	t, ok := Table[c]
 	if !ok {
 		return "", false
 	}
-	return td.Name, true
+	return t.Name, true
 }
 
 // ToShortName returns short name of the token.
