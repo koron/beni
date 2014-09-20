@@ -6,6 +6,25 @@ import (
 	"strings"
 )
 
+var JavaInfo = Info{
+	Name:        "Java",
+	Aliases:     []string{"java"},
+	Filenames:   []string{"*.java"},
+	Mimetypes:   []string{"text/x-java"},
+	Description: "The Java programming language (java.com)",
+}
+
+type JavaFactory struct {
+}
+
+func (f *JavaFactory) GetInfo() Info {
+	return JavaInfo
+}
+
+func (f *JavaFactory) New() Lexer {
+	return NewJavaLexer()
+}
+
 var javaKeywords = []string{
 	"assert", "break", "case", "catch", "continue", "default", "do", "else",
 	"finally", "for", "if", "goto", "instanceof", "new", "return", "switch",
@@ -29,18 +48,15 @@ var javaId = "[a-zA-Z_][a-zA-Z0-9_]*"
 var javaLexerData *RegexpLexerData
 
 func getJavaLexerData() *RegexpLexerData {
-	if (javaLexerData != nil) {
+	if javaLexerData != nil {
 		return javaLexerData
 	}
+
 	javaLexerData = &RegexpLexerData{
-		Info: Info{
-			Name:        "Java",
-			Aliases:     []string{"java"},
-			Filenames:   []string{"*.java"},
-			Mimetypes:   []string{"text/x-java"},
-			Description: "The Java programming language (java.com)",
-		},
+		Info: JavaInfo,
+
 		States: map[RegexpLexerState][]RegexpLexerRule{
+
 			Root: []RegexpLexerRule{
 				RegexpLexerRule{
 					Pattern: "^" +
@@ -147,6 +163,7 @@ func getJavaLexerData() *RegexpLexerData {
 					Behavior: RegexpEmit(LiteralNumberInteger),
 				},
 			},
+
 			JavaClass: []RegexpLexerRule{
 				RegexpLexerRule{
 					Pattern:  javaSpaces,
@@ -157,6 +174,7 @@ func getJavaLexerData() *RegexpLexerData {
 					Behavior: RegexpEmitPop(NameClass),
 				},
 			},
+
 			JavaImport: []RegexpLexerRule{
 				RegexpLexerRule{
 					Pattern:  javaSpaces,
@@ -169,6 +187,7 @@ func getJavaLexerData() *RegexpLexerData {
 			},
 		},
 	}
+
 	return javaLexerData
 }
 

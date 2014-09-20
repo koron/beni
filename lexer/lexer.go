@@ -5,13 +5,6 @@ import (
 	"io"
 )
 
-type Emitter func(token.Code, string) error
-
-type Lexer interface {
-	GetInfo() Info
-	Parse(r io.Reader, emit Emitter) error
-}
-
 type Info struct {
 	Name           string
 	Aliases        []string
@@ -20,4 +13,18 @@ type Info struct {
 	Mimetypes      []string
 	Priority       int
 	Description    string
+}
+
+type Emitter interface {
+	Emit(token.Code, string) error
+}
+
+type Lexer interface {
+	GetInfo() Info
+	Parse(r io.Reader, emit Emitter) error
+}
+
+type Factory interface {
+	GetInfo() Info
+	New() Lexer
 }
