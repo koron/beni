@@ -174,7 +174,7 @@ func (f *javaFactory) Info() Info {
 }
 
 func (f *javaFactory) New() (Lexer, error) {
-	return NewRegexpLexer(&RegexpLexerData{
+	return NewRegexpLexer(&RegexpLexerDefinition{
 		Info: javaInfo,
 		States: javaStates,
 	})
