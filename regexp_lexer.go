@@ -16,10 +16,20 @@ const (
 	Import
 )
 
+type StateMachine interface {
+	Emit(t Token, s string) error
+	Push(t State) error
+	Pop() error
+	Delegate(l Lexer, s string) error
+}
+
+type Behavior func(m StateMachine, groups []string) error
+
 type Rule struct {
-	Pattern string
-	Token   Token
-	Next    State
+	Pattern  string
+	Token    Token
+	Next     State
+	Behavior Behavior
 
 	regexp *regexp.Regexp
 }

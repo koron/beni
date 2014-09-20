@@ -1,6 +1,7 @@
 package beni
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -21,7 +22,7 @@ var types = []string{
 	"void",
 }
 
-var spaces = "(?m:\\s+)"
+var spaces = "(?s:\\s+)"
 var id = "[a-zA-Z_][a-zA-Z0-9_]*"
 
 var JavaLexer = &RegexpLexer{
@@ -34,9 +35,31 @@ var JavaLexer = &RegexpLexer{
 	},
 	Tokens: map[State][]*Rule{
 		Root: []*Rule{
+			&Rule{
+				Pattern: "^" +
+					"(\\s*(?:[A-Za-z_][0-9A-Za-z_.\\[\\]]*\\s+)+?)" +
+					"([A-Za-z_][0-9A-Za-z_]*)" +
+					"(\\s*)(\\()",
+				Behavior: func(m StateMachine, groups []string) error {
+					// XXX: Specify JavaLexer
+					if err := m.Delegate(nil, groups[0]); err != nil {
+						return err
+					}
+					if err := m.Emit(NameFunction, groups[1]); err != nil {
+						return err
+					}
+					if err := m.Emit(Text, groups[2]); err != nil {
+						return err
+					}
+					if err := m.Emit(Punctuation, groups[3]); err != nil {
+						return err
+					}
+					return nil
+				},
+			},
 			&Rule{Pattern: "\\s+", Token: Text},
 			&Rule{Pattern: "//.*?$", Token: CommentSingle},
-			&Rule{Pattern: "(?m:/\\*.*?\\*/)", Token: CommentMultiline},
+			&Rule{Pattern: "(?s:/\\*.*?\\*/)", Token: CommentMultiline},
 			&Rule{Pattern: "@" + id, Token: NameDecorator},
 			&Rule{
 				Pattern: "(?:" + strings.Join(keywords, "|") + ")\\b",
@@ -59,6 +82,59 @@ var JavaLexer = &RegexpLexer{
 				Pattern: "(?:class|interface)\\b",
 				Token:   KeywordDeclaration,
 				Next:    Class,
+			},
+			&Rule{
+				Pattern: "import\b",
+				Token:   KeywordNamespace,
+				Next:    Import,
+			},
+			&Rule{
+				Pattern: "(\\\\|\\\"|[^\"])*\"",
+				Token:   LiteralString,
+			},
+			&Rule{
+				Pattern: "'(?:\\.|[^\\]|\\u[0-9a-fA-F]{4})'",
+				Token:   LiteralStringChar,
+			},
+			&Rule{
+				Pattern: "(\\.)(" + id + ")",
+				Behavior: func(m StateMachine, groups []string) error {
+					if len(groups) != 2 {
+						return fmt.Errorf("expected 2 groups, acutual %d",
+							len(groups))
+					}
+					if err := m.Emit(Operator, groups[0]); err != nil {
+						return err
+					}
+					if err := m.Emit(NameAttribute, groups[1]); err != nil {
+						return err
+					}
+					return nil
+				},
+			},
+			&Rule{
+				Pattern: id + ":",
+				Token:   NameLabel,
+			},
+			&Rule{
+				Pattern: "\\$?" + id,
+				Token:   Name,
+			},
+			&Rule{
+				Pattern: "[~^*~%&\\[\\](){}<>\\|+=:;,./?-]",
+				Token:   Operator,
+			},
+			&Rule{
+				Pattern: "[0-9][0-9]*\\.[0-9]+([eE][0-9]+)?[fd]?",
+				Token:   LiteralNumber,
+			},
+			&Rule{
+				Pattern: "0x[0-9a-fA-F]+",
+				Token:   LiteralNumberHex,
+			},
+			&Rule{
+				Pattern: "[0-9]+L?",
+				Token:   LiteralNumberInteger,
 			},
 		},
 		Class: []*Rule{
