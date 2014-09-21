@@ -1,5 +1,5 @@
 package theme
 
-var All = []ThemeDefinition{
+var All = []Theme{
 	Base16,
 }
