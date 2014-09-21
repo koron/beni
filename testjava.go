@@ -11,7 +11,7 @@ type emitter struct {
 }
 
 func (e *emitter) Emit(c token.Code, s string) error {
-	fmt.Printf("%s: %s\n", c.Name(), s)
+	fmt.Printf("%s: %q\n", c.Name(), s)
 	return nil
 }
 
@@ -23,6 +23,7 @@ func parse(name string) error {
 	defer f.Close()
 
 	l, err := lexer.Java.New()
+	//l.SetDebug(true)
 	if err != nil {
 		return err
 	}

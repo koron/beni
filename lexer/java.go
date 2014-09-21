@@ -55,57 +55,57 @@ var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 				return c.Emit(Punctuation, groups[4])
 			},
 		},
-		RegexpLexerRule{Pattern: "\\s+", Action: RegexpEmit(Text)},
+		RegexpLexerRule{Pattern: "^\\s+", Action: RegexpEmit(Text)},
 		RegexpLexerRule{
-			Pattern: "//.*?$",
+			Pattern: "^//.*?$",
 			Action:  RegexpEmit(CommentSingle),
 		},
 		RegexpLexerRule{
-			Pattern: "(?s:/\\*.*?\\*/)",
+			Pattern: "^(?s:/\\*.*?\\*/)",
 			Action:  RegexpEmit(CommentMultiline),
 		},
 		RegexpLexerRule{
-			Pattern: "@" + javaId,
+			Pattern: "^@" + javaId,
 			Action:  RegexpEmit(NameDecorator),
 		},
 		RegexpLexerRule{
-			Pattern: "(?:" + strings.Join(javaKeywords, "|") + ")\\b",
+			Pattern: "^(?:" + strings.Join(javaKeywords, "|") + ")\\b",
 			Action:  RegexpEmit(Keyword),
 		},
 		RegexpLexerRule{
-			Pattern: "(?:" + strings.Join(javaDeclarations, "|") + ")\\b",
+			Pattern: "^(?:" + strings.Join(javaDeclarations, "|") + ")\\b",
 			Action:  RegexpEmit(KeywordDeclaration),
 		},
 		RegexpLexerRule{
-			Pattern: "(?:" + strings.Join(javaTypes, "|") + ")\\b",
+			Pattern: "^(?:" + strings.Join(javaTypes, "|") + ")\\b",
 			Action:  RegexpEmit(KeywordType),
 		},
 		RegexpLexerRule{
-			Pattern: "package\\b",
+			Pattern: "^package\\b",
 			Action:  RegexpEmit(KeywordNamespace),
 		},
 		RegexpLexerRule{
-			Pattern: "(?:true|false|null)\\b",
+			Pattern: "^(?:true|false|null)\\b",
 			Action:  RegexpEmit(KeywordConstant),
 		},
 		RegexpLexerRule{
-			Pattern: "(?:class|interface)\\b",
+			Pattern: "^(?:class|interface)\\b",
 			Action:  RegexpEmitPush(KeywordDeclaration, JavaClass),
 		},
 		RegexpLexerRule{
-			Pattern: "import\b",
+			Pattern: "^import\b",
 			Action:  RegexpEmitPush(KeywordNamespace, JavaImport),
 		},
 		RegexpLexerRule{
-			Pattern: "(\\\\|\\\"|[^\"])*\"",
+			Pattern: "^\"(\\\\|\\\"|[^\"])*\"",
 			Action:  RegexpEmit(LiteralString),
 		},
 		RegexpLexerRule{
-			Pattern: "'(?:\\.|[^\\]|\\\\u[0-9a-fA-F]{4})'",
+			Pattern: "^'(?:\\.|[^\\]|\\\\u[0-9a-fA-F]{4})'",
 			Action:  RegexpEmit(LiteralStringChar),
 		},
 		RegexpLexerRule{
-			Pattern: "(\\.)(" + javaId + ")",
+			Pattern: "^(\\.)(" + javaId + ")",
 			Action: func(c RegexpLexerContext, groups []string) error {
 				if len(groups) != 3 {
 					return fmt.Errorf("expected 3 groups, acutual %d",
@@ -118,49 +118,49 @@ var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 			},
 		},
 		RegexpLexerRule{
-			Pattern: javaId + ":",
+			Pattern: "^" + javaId + ":",
 			Action:  RegexpEmit(NameLabel),
 		},
 		RegexpLexerRule{
-			Pattern: "\\$?" + javaId,
+			Pattern: "^\\$?" + javaId,
 			Action:  RegexpEmit(Name),
 		},
 		RegexpLexerRule{
-			Pattern: "[~^*~%&\\[\\](){}<>\\|+=:;,./?-]",
+			Pattern: "^[~^*~%&\\[\\](){}<>\\|+=:;,./?-]",
 			Action:  RegexpEmit(Operator),
 		},
 		RegexpLexerRule{
-			Pattern: "[0-9][0-9]*\\.[0-9]+([eE][0-9]+)?[fd]?",
+			Pattern: "^[0-9][0-9]*\\.[0-9]+([eE][0-9]+)?[fd]?",
 			Action:  RegexpEmit(LiteralNumber),
 		},
 		RegexpLexerRule{
-			Pattern: "0x[0-9a-fA-F]+",
+			Pattern: "^0x[0-9a-fA-F]+",
 			Action:  RegexpEmit(LiteralNumberHex),
 		},
 		RegexpLexerRule{
-			Pattern: "[0-9]+L?",
+			Pattern: "^[0-9]+L?",
 			Action:  RegexpEmit(LiteralNumberInteger),
 		},
 	},
 
 	JavaClass: []RegexpLexerRule{
 		RegexpLexerRule{
-			Pattern: javaSpaces,
+			Pattern: "^" + javaSpaces,
 			Action:  RegexpEmit(Text),
 		},
 		RegexpLexerRule{
-			Pattern: javaId,
+			Pattern: "^" + javaId,
 			Action:  RegexpEmitPop(NameClass),
 		},
 	},
 
 	JavaImport: []RegexpLexerRule{
 		RegexpLexerRule{
-			Pattern: javaSpaces,
+			Pattern: "^" + javaSpaces,
 			Action:  RegexpEmit(Text),
 		},
 		RegexpLexerRule{
-			Pattern: "(?i:[a-zA-Z0-9_.]+\\*?)",
+			Pattern: "^(?i:[a-zA-Z0-9_.]+\\*?)",
 			Action:  RegexpEmitPop(NameNamespace),
 		},
 	},

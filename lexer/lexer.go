@@ -23,6 +23,8 @@ type Emitter interface {
 type Lexer interface {
 	GetInfo() Info
 	ParseString(s string, e Emitter) error
+	GetDebug() bool
+	SetDebug(v bool)
 }
 
 type Factory interface {

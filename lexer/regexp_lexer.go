@@ -84,9 +84,14 @@ func (r *regexpRule) match(s string) []string {
 	return r.regexp.FindStringSubmatch(s)
 }
 
+func (r *regexpRule) String() string {
+	return fmt.Sprintf("rule{pattern=%s}", r.regexp.String())
+}
+
 type RegexpLexer struct {
 	Info   Info
 	States map[RegexpLexerState][]*regexpRule
+	Debug  bool
 }
 
 func NewRegexpLexer(d *RegexpLexerDef) (*RegexpLexer, error) {
@@ -110,9 +115,18 @@ func (l *RegexpLexer) ParseString(s string, e Emitter) error {
 		lexer:      l,
 		emitter:    e,
 		stateStack: list.New(),
+		debug:      l.Debug,
 	}
 	c.stateStack.PushBack(Root)
 	return c.parse(s)
+}
+
+func (l *RegexpLexer) GetDebug() bool {
+	return l.Debug
+}
+
+func (l *RegexpLexer) SetDebug(v bool) {
+	l.Debug = v
 }
 
 func (l *RegexpLexer) Rules(s RegexpLexerState) []*regexpRule {
@@ -127,6 +141,7 @@ type regexpLexerContext struct {
 	lexer      *RegexpLexer
 	emitter    Emitter
 	stateStack *list.List
+	debug      bool
 }
 
 func (c *regexpLexerContext) Emit(t token.Code, s string) error {
@@ -175,9 +190,16 @@ func (c *regexpLexerContext) currentState() RegexpLexerState {
 	return v
 }
 
+func (c *regexpLexerContext) debugf(s string, a ...interface{}) {
+	if c.debug {
+		fmt.Print("RegexpLexer:DEBUG:")
+		fmt.Printf(s, a...)
+	}
+}
+
 func (c *regexpLexerContext) parse(s string) error {
 ParseLoop:
-	for true {
+	for len(s) > 0 {
 		rules := c.lexer.Rules(c.currentState())
 		if rules == nil {
 			return fmt.Errorf("unknown state: %v", c.currentState())
@@ -187,6 +209,7 @@ ParseLoop:
 			if m == nil {
 				continue
 			}
+			c.debugf("s=%v r=%s m=%q\n", c.currentState().String(), rule, m)
 			if len(m[0]) == 0 {
 				return errors.New("matched with empty")
 			}
@@ -197,7 +220,9 @@ ParseLoop:
 			continue ParseLoop
 		}
 		// forward pointer if no rules matched.
-		_, n := utf8.DecodeRuneInString(s)
+		ch, n := utf8.DecodeRuneInString(s)
+		// FIXME: need to emit 'ch'?
+		c.debugf("skip %q\n", ch)
 		s = s[n:]
 	}
 	return nil
