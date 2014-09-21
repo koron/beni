@@ -2,8 +2,8 @@ package lexer
 
 import (
 	"fmt"
-	. "github.com/koron/beni/token"
 	"strings"
+	. "github.com/koron/beni/token"
 )
 
 var javaInfo = Info{

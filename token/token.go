@@ -120,7 +120,7 @@ const (
 	GenericLineno
 )
 
-// Definition of all tokens 
+// Definition of all tokens
 var Tokens = []Token{
 	Token{Text, "Text", "", 0},
 	Token{TextWhitespace, "Whitespace", "w", Text},

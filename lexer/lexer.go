@@ -1,9 +1,10 @@
 package lexer
 
 import (
-	"github.com/koron/beni/token"
 	"io"
 	"io/ioutil"
+
+	"github.com/koron/beni/token"
 )
 
 type Info struct {

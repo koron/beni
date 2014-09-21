@@ -4,9 +4,10 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"github.com/koron/beni/token"
 	"regexp"
 	"unicode/utf8"
+
+	"github.com/koron/beni/token"
 )
 
 type RegexpLexerContext interface {
