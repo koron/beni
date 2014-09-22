@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/koron/beni/token"
 	"regexp"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -226,4 +227,12 @@ ParseLoop:
 		s = s[n:]
 	}
 	return nil
+}
+
+func regexpLexerJoin(words []string) string {
+	quoted := make([]string, len(words))
+	for i, v := range words {
+		quoted[i] = regexp.QuoteMeta(v)
+	}
+	return strings.Join(quoted, "|")
 }
