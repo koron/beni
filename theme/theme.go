@@ -35,7 +35,16 @@ func (t *ThemeDefinition) GetName() string {
 }
 
 func (t *ThemeDefinition) GetStyle(tc token.Code) Style {
-	return Style{}
+	// FIXME: style cascading
+	s := t.findStyle(tc)
+	for s != nil {
+		tc = tc.Parent()
+		if tc == 0 {
+			return Style{}
+		}
+		s = t.findStyle(tc)
+	}
+	return *s
 }
 
 func (t *ThemeDefinition) GetColor(cc ColorCode) Color {
@@ -44,4 +53,12 @@ func (t *ThemeDefinition) GetColor(cc ColorCode) Color {
 		return Color{}
 	}
 	return color
+}
+
+func (t *ThemeDefinition) findStyle(tc token.Code) *Style {
+	s, ok := t.Styles[tc]
+	if !ok {
+		return nil
+	}
+	return &s
 }

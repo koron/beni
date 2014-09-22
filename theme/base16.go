@@ -5,22 +5,22 @@ import (
 )
 
 const (
-	base16_00 ColorCode = iota
-	base16_01           = iota
-	base16_02           = iota
-	base16_03           = iota
-	base16_04           = iota
-	base16_05           = iota
-	base16_06           = iota
-	base16_07           = iota
-	base16_08           = iota
-	base16_09           = iota
-	base16_0A           = iota
-	base16_0B           = iota
-	base16_0C           = iota
-	base16_0D           = iota
-	base16_0E           = iota
-	base16_0F           = iota
+	base16_00 ColorCode = iota + 1
+	base16_01
+	base16_02
+	base16_03
+	base16_04
+	base16_05
+	base16_06
+	base16_07
+	base16_08
+	base16_09
+	base16_0A
+	base16_0B
+	base16_0C
+	base16_0D
+	base16_0E
+	base16_0F
 )
 
 var Base16 = &ThemeDefinition{
