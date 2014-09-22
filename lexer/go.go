@@ -2,14 +2,13 @@ package lexer
 
 import (
 	. "github.com/koron/beni/token"
-	"strings"
 )
 
 var GO_INFO = Info{
 	Name:        "go",
 	Aliases:     []string{"go", "golang"},
 	Filenames:   []string{"*.go"},
-	Mimetypes:   []string{"text/x-go", "application/x-go"},
+	Mimetypes:   []string{"text/x-go", "application/x-go", "text/x-gosrc"},
 	Description: "The Go programming language (http://golang.org)",
 }
 
@@ -49,124 +48,149 @@ var (
 		"delete", "imag", "len", "make", "new",
 		"panic", "print", "println", "real", "recover",
 	}
-
-	// Characters
-	GO_WHITE_SPACE    = "[\\s\\t\\r\\n]+"
-	GO_NEWLINE        = "\\n"
-	GO_UNICODE_CHAR   = "[^\\n]"
-	GO_UNICODE_LETTER = "[[:alpha:]]"
-	GO_UNICODE_DIGIT  = "[[:digit:]]"
-
-	// Letters and digits
-	GO_LETTER        = "[[:alpha:]|]"
-	GO_DECIMAL_DIGIT = "[0-9]"
-	GO_OCTAL_DIGIT   = "[0-7]"
-	GO_HEX_DIGIT     = "[0-9A-Fa-f]"
-
-	// Comments
-	GO_LINE_COMMENT    = "//[^" + GO_NEWLINE + "]*"
-	GO_GENERAL_COMMENT = "(?s:/\\*.*?\\*/)"
-	GO_COMMENT         = GO_LINE_COMMENT + "|" + GO_GENERAL_COMMENT
-
-	// Keywords
-	GO_KEYWORD = "\\b(?:" + regexpLexerJoin(GO_KEYWORDS) + ")\\b"
-
-	// Identifiers
-	GO_IDENTIFIER = "[[:alpha:]]|[[:alpha:][:digit:]]*"
-
-	// Operators and delimiters
-	GO_OPERATOR  = regexpLexerJoin(GO_OPERATORS)
-	GO_SEPARATOR = regexpLexerJoin(GO_SEPARATORS)
-
-	// Integer literals
-	GO_DECIMAL_LIT = "[1-9]" + GO_DECIMAL_DIGIT + "*"
-	GO_OCTAL_LIT   = "0" + GO_OCTAL_DIGIT + "*"
-	GO_HEX_LIT     = "0[xX]" + GO_HEX_DIGIT + "+"
-	GO_INT_LIT     = strings.Join([]string{
-		GO_HEX_LIT, GO_DECIMAL_LIT, GO_OCTAL_LIT,
-	}, "|")
-
-	// Floating-point literals
-	GO_DECIMALS  = GO_DECIMAL_DIGIT + "+"
-	GO_EXPONENT  = "[eE][+-]?" + GO_DECIMALS
-	GO_FLOAT_LIT = "" +
-		GO_DECIMALS + "\\\\." + GO_DECIMALS + "?" + GO_EXPONENT + "?" +
-		"|" + GO_DECIMALS + GO_EXPONENT +
-		"|" + "\\\\." + GO_DECIMALS + GO_EXPONENT + "?"
-
-	// Imaginary literals
-	GO_IMAGINARY_LIT = "(?:" + GO_DECIMALS + "|" + GO_FLOAT_LIT + ")i"
-
-	// Rune literals
-	// String literals
-
-	// Predeclared identifiers
-	GO_PREDECLARED_TYPES     = "\\b(?:" + regexpLexerJoin(GO_TYPES) + ")\\b"
-	GO_PREDECLARED_CONSTANTS = "\\b(?:" + regexpLexerJoin(GO_CONSTANTS) + ")\\b"
-	GO_PREDECLARED_FUNCTIONS = "\\b(?:" + regexpLexerJoin(GO_FUNCTIONS) + ")\\b"
 )
 
 var GO_STATES = map[RegexpLexerState][]RegexpLexerRule{
 	Root: []RegexpLexerRule{
+		// Comments
 		RegexpLexerRule{
-			Pattern: "^(?:" + GO_COMMENT + ")",
+			Name:    "line comment",
+			Pattern: "^//[^\\n]*",
 			Action:  RegexpEmit(Comment),
 		},
 		RegexpLexerRule{
-			Pattern: "^" + GO_KEYWORD,
+			Name:    "general comment",
+			Pattern: "^(?s:/\\*.*?\\*/)",
+			Action:  RegexpEmit(Comment),
+		},
+
+		// Keywords
+		RegexpLexerRule{
+			Name:    "keyword",
+			Pattern: "^(?:" + regexpQuoteJoin(GO_KEYWORDS...) + ")\\b",
 			Action:  RegexpEmit(Keyword),
 		},
 		RegexpLexerRule{
-			Pattern: "^" + GO_PREDECLARED_TYPES,
+			Name:    "predeclared type",
+			Pattern: "^(?:" + regexpQuoteJoin(GO_TYPES...) + ")\\b",
 			Action:  RegexpEmit(KeywordType),
 		},
 		RegexpLexerRule{
-			Pattern: "^" + GO_PREDECLARED_FUNCTIONS,
+			Name:    "predeclared function",
+			Pattern: "^(?:" + regexpQuoteJoin(GO_FUNCTIONS...) + ")\\b",
 			Action:  RegexpEmit(NameBuiltin),
 		},
 		RegexpLexerRule{
-			Pattern: "^" + GO_PREDECLARED_CONSTANTS,
+			Name:    "predeclared constant",
+			Pattern: "^(?:" + regexpQuoteJoin(GO_CONSTANTS...) + ")\\b",
 			Action:  RegexpEmit(NameConstant),
 		},
+
+		// Literals (except strings)
 		RegexpLexerRule{
-			Pattern: "^" + GO_IMAGINARY_LIT,
+			Name: "imaginary lit",
+			Pattern: "^(?:" + regexpJoin(
+				"\\d+i",
+				`\d+(?:[eE][+-]?\d+)i`,
+				`.\d+(?:[eE][+-]?\d+)?i`,
+				`\d+\.\d+(?:[eE][+-]?\d+)?i`,
+			) + ")",
 			Action:  RegexpEmit(LiteralNumber),
 		},
+
+		// Float literals
 		RegexpLexerRule{
-			Pattern: "^(?:" + GO_FLOAT_LIT + ")",
+			Name: "float lit",
+			Pattern: "^(?:" + regexpJoin(
+				`\d+(?:[eE][+-]?\d+)`,
+				`.\d+(?:[eE][+-]?\d+)?`,
+				`\d+\.\d+(?:[eE][+-]?\d+)?`,
+			) + ")",
 			Action:  RegexpEmit(LiteralNumber),
 		},
+
+		// Integer literals
 		RegexpLexerRule{
-			Pattern: "^(?:" + GO_INT_LIT + ")",
-			Action:  RegexpEmit(LiteralNumber),
+			Name:    "octal lit",
+			Pattern: "^0[0-7]+",
+			Action:  RegexpEmit(LiteralNumberHex),
 		},
-		// TODO: add rules
 		RegexpLexerRule{
-			Pattern: GO_WHITE_SPACE,
+			Name:    "hex lit",
+			Pattern: "^0[xX][[:xdigit:]]+",
+			Action:  RegexpEmit(LiteralNumberHex),
+		},
+		RegexpLexerRule{
+			Name:    "decimal lit",
+			Pattern: "^(?:0|[1-9]\\d*)",
+			Action:  RegexpEmit(LiteralNumberInteger),
+		},
+
+		// Character literal
+		RegexpLexerRule{
+			Name: "char lit",
+			Pattern: "^'(?:" + regexpJoin(
+				"\\\\[abfnrtv'\"]",
+				"\\\\u[[:xdigit:]]{4}",
+				"\\\\U[[:xdigit:]]{8}",
+				"\\\\x[[:xdigit:]]{2}",
+				"\\\\[0-7]{3}",
+				"[^\\\\]",
+			) + ")'",
+			Action: RegexpEmit(LiteralStringChar),
+		},
+
+		// Operators and separators
+		RegexpLexerRule{
+			Name:    "operator",
+			Pattern: "^(?:" + regexpQuoteJoin(GO_OPERATORS...) + ")",
+			Action:  RegexpEmit(Operator),
+		},
+		RegexpLexerRule{
+			Name:    "separator",
+			Pattern: "^(?:" + regexpQuoteJoin(GO_SEPARATORS...) + ")",
+			Action:  RegexpEmit(Punctuation),
+		},
+
+		// Identifiers
+		RegexpLexerRule{
+			Name:    "identifier",
+			Pattern: "^[\\pL][\\pL\\d_]*",
+			Action:  RegexpEmit(Name),
+		},
+
+		// Strings
+		RegexpLexerRule{
+			Name:    "raw string lit",
+			Pattern: "^(?s:`[^`]*`)",
+			Action:  RegexpEmit(LiteralString),
+		},
+		RegexpLexerRule{
+			Name:    "interpreted string lit",
+			Pattern: `^"(?:\\\\|\\"|[^"])*"`,
+			Action:  RegexpEmit(LiteralString),
+		},
+
+		// Others
+		RegexpLexerRule{
+			Pattern: "^\\s+",
 			Action:  RegexpEmit(Other),
 		},
 	},
-
-	GoRawString: []RegexpLexerRule{
-		// TODO: support escape sequence
-		RegexpLexerRule{
-			Pattern: "^[^\"]+",
-			Action:  RegexpEmit(LiteralString),
-		},
-		RegexpLexerRule{
-			Pattern: "^\"",
-			Action:  RegexpEmitPop(LiteralString),
-		},
-	},
-
-	GoInterpretedString: []RegexpLexerRule{
-		RegexpLexerRule{
-			Pattern: "^(?m:^[^`]+)",
-			Action:  RegexpEmit(LiteralString),
-		},
-		RegexpLexerRule{
-			Pattern: "^`",
-			Action:  RegexpEmitPop(LiteralString),
-		},
-	},
 }
+
+type goFactory struct {
+}
+
+func (f *goFactory) Info() Info {
+	return GO_INFO
+}
+
+func (f *goFactory) New() (Lexer, error) {
+	return NewRegexpLexer(&RegexpLexerDef{
+		Info:   GO_INFO,
+		States: GO_STATES,
+	})
+}
+
+var Go = &goFactory{}
