@@ -1,15 +1,16 @@
 package lexer
 
+// RegexpLexerState is state of RegexpLexer.
 type RegexpLexerState int32
 
 const (
+	// Root is initial state.
 	Root RegexpLexerState = iota
 
+	// JavaClass is indicate class for Java.
 	JavaClass
+	// JavaImport is indicate import for Java.
 	JavaImport
-
-	GoRawString
-	GoInterpretedString
 )
 
 func (s RegexpLexerState) String() string {

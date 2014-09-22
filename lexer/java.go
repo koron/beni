@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"fmt"
-	"strings"
 	. "github.com/koron/beni/token"
 )
 
@@ -14,33 +13,36 @@ var javaInfo = Info{
 	Description: "The Java programming language (java.com)",
 }
 
-var javaKeywords = []string{
-	"assert", "break", "case", "catch", "continue", "default", "do", "else",
-	"finally", "for", "if", "goto", "instanceof", "new", "return", "switch",
-	"this", "throw", "try", "while",
-}
 
-var javaDeclarations = []string{
-	"abstract", "const", "enum", "extends", "final", "implements", "native",
-	"private", "protected", "public", "static", "strictfp", "super",
-	"synchronized", "throws", "transient", "volatile",
-}
+var (
+	javaKeywords = []string{
+		"assert", "break", "case", "catch", "continue", "default", "do",
+		"else", "finally", "for", "if", "goto", "instanceof", "new", "return",
+		"switch", "this", "throw", "try", "while",
+	}
 
-var javaTypes = []string{
-	"boolean", "byte", "char", "double", "float", "int", "long", "short",
-	"void",
-}
+	javaDeclarations = []string{
+		"abstract", "const", "enum", "extends", "final", "implements",
+		"native", "private", "protected", "public", "static", "strictfp",
+		"super", "synchronized", "throws", "transient", "volatile",
+	}
 
-var javaSpaces = "(?s:\\s+)"
+	javaTypes = []string{
+		"boolean", "byte", "char", "double", "float", "int", "long", "short",
+		"void",
+	}
 
-var javaId = "[a-zA-Z_][a-zA-Z0-9_]*"
+	javaSpaces = "(?s:\\s+)"
+
+	javaID = "[a-zA-Z_][a-zA-Z0-9_]*"
+)
 
 var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 	Root: []RegexpLexerRule{
 		RegexpLexerRule{
 			Pattern: "^" +
 				"(\\s*(?:[A-Za-z_][0-9A-Za-z_.\\[\\]]*\\s+)+?)" +
-				"(" + javaId + ")" +
+				"(" + javaID + ")" +
 				"(\\s*)(\\()",
 			Action: func(c RegexpLexerContext, groups []string) error {
 				if err := c.ParseString(groups[1]); err != nil {
@@ -65,19 +67,19 @@ var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 			Action:  RegexpEmit(CommentMultiline),
 		},
 		RegexpLexerRule{
-			Pattern: "^@" + javaId,
+			Pattern: "^@" + javaID,
 			Action:  RegexpEmit(NameDecorator),
 		},
 		RegexpLexerRule{
-			Pattern: "^(?:" + strings.Join(javaKeywords, "|") + ")\\b",
+			Pattern: "^(?:" + regexpJoin(javaKeywords...) + ")\\b",
 			Action:  RegexpEmit(Keyword),
 		},
 		RegexpLexerRule{
-			Pattern: "^(?:" + strings.Join(javaDeclarations, "|") + ")\\b",
+			Pattern: "^(?:" + regexpJoin(javaDeclarations...) + ")\\b",
 			Action:  RegexpEmit(KeywordDeclaration),
 		},
 		RegexpLexerRule{
-			Pattern: "^(?:" + strings.Join(javaTypes, "|") + ")\\b",
+			Pattern: "^(?:" + regexpJoin(javaTypes...) + ")\\b",
 			Action:  RegexpEmit(KeywordType),
 		},
 		RegexpLexerRule{
@@ -105,7 +107,7 @@ var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 			Action:  RegexpEmit(LiteralStringChar),
 		},
 		RegexpLexerRule{
-			Pattern: "^(\\.)(" + javaId + ")",
+			Pattern: "^(\\.)(" + javaID + ")",
 			Action: func(c RegexpLexerContext, groups []string) error {
 				if len(groups) != 3 {
 					return fmt.Errorf("expected 3 groups, acutual %d",
@@ -118,11 +120,11 @@ var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 			},
 		},
 		RegexpLexerRule{
-			Pattern: "^" + javaId + ":",
+			Pattern: "^" + javaID + ":",
 			Action:  RegexpEmit(NameLabel),
 		},
 		RegexpLexerRule{
-			Pattern: "^\\$?" + javaId,
+			Pattern: "^\\$?" + javaID,
 			Action:  RegexpEmit(Name),
 		},
 		RegexpLexerRule{
@@ -149,7 +151,7 @@ var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 			Action:  RegexpEmit(Text),
 		},
 		RegexpLexerRule{
-			Pattern: "^" + javaId,
+			Pattern: "^" + javaID,
 			Action:  RegexpEmitPop(NameClass),
 		},
 	},
@@ -180,4 +182,5 @@ func (f *javaFactory) New() (Lexer, error) {
 	})
 }
 
+// Java lexer factory.
 var Java = &javaFactory{}

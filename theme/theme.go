@@ -4,37 +4,44 @@ import (
 	"github.com/koron/beni/token"
 )
 
+// Color indicates hightlight color.
 type Color struct {
 	Red   uint8
 	Green uint8
 	Blue  uint8
 }
 
+// ColorCode is index of color pallet. 
 type ColorCode int32
 
+// Style indicates hightlight style for syntax elements.
 type Style struct {
 	Fg   ColorCode
 	Bg   ColorCode
 	Bold bool
 }
 
+// Theme interface.
 type Theme interface {
 	GetName() string
 	GetStyle(tc token.Code) Style
 	GetColor(cc ColorCode) Color
 }
 
-type ThemeDefinition struct {
+// Definition describes Theme.
+type Definition struct {
 	Name     string
 	Palettes map[ColorCode]Color
 	Styles   map[token.Code]Style
 }
 
-func (t *ThemeDefinition) GetName() string {
+// GetName returns name of theme.
+func (t *Definition) GetName() string {
 	return t.Name
 }
 
-func (t *ThemeDefinition) GetStyle(tc token.Code) Style {
+// GetStyle returns Style for token.Code.
+func (t *Definition) GetStyle(tc token.Code) Style {
 	// FIXME: style cascading
 	s := t.findStyle(tc)
 	for s != nil {
@@ -47,7 +54,8 @@ func (t *ThemeDefinition) GetStyle(tc token.Code) Style {
 	return *s
 }
 
-func (t *ThemeDefinition) GetColor(cc ColorCode) Color {
+// GetColor returns Color for ColorCode.
+func (t *Definition) GetColor(cc ColorCode) Color {
 	color, ok := t.Palettes[cc]
 	if !ok {
 		return Color{}
@@ -55,7 +63,7 @@ func (t *ThemeDefinition) GetColor(cc ColorCode) Color {
 	return color
 }
 
-func (t *ThemeDefinition) findStyle(tc token.Code) *Style {
+func (t *Definition) findStyle(tc token.Code) *Style {
 	s, ok := t.Styles[tc]
 	if !ok {
 		return nil

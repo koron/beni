@@ -11,6 +11,7 @@ import (
 	"github.com/koron/beni/token"
 )
 
+// RegexpLexerContext is context of lexer.
 type RegexpLexerContext interface {
 	Emit(t token.Code, s string) error
 	Push(s RegexpLexerState) error
@@ -18,6 +19,7 @@ type RegexpLexerContext interface {
 	ParseString(s string) error
 }
 
+// RegexpAction do action for matched rule.
 type RegexpAction func(c RegexpLexerContext, groups []string) error
 
 // RegexpEmit generate "emit" action.
@@ -37,7 +39,7 @@ func RegexpEmitPush(t token.Code, s RegexpLexerState) RegexpAction {
 	}
 }
 
-// RegexpEmitPush generate "emit and pop" action.
+// RegexpEmitPop generate "emit and pop" action.
 func RegexpEmitPop(t token.Code) RegexpAction {
 	return func(c RegexpLexerContext, groups []string) error {
 		if err := c.Emit(t, groups[0]); err != nil {
@@ -47,13 +49,14 @@ func RegexpEmitPop(t token.Code) RegexpAction {
 	}
 }
 
+// RegexpLexerRule represents a rule of RegexpLexer.
 type RegexpLexerRule struct {
 	Name    string
 	Pattern string
 	Action  RegexpAction
 }
 
-func (r RegexpLexerRule) Convert() (*regexpRule, error) {
+func (r RegexpLexerRule) convert() (*regexpRule, error) {
 	rx, err := regexp.Compile(r.Pattern)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, r.Pattern)
@@ -68,7 +71,7 @@ func (r RegexpLexerRule) Convert() (*regexpRule, error) {
 func regexpConvertRules(src []RegexpLexerRule) ([]*regexpRule, error) {
 	dst := make([]*regexpRule, len(src))
 	for i, rs := range src {
-		rd, err := rs.Convert()
+		rd, err := rs.convert()
 		if err != nil {
 			return nil, err
 		}
@@ -77,6 +80,7 @@ func regexpConvertRules(src []RegexpLexerRule) ([]*regexpRule, error) {
 	return dst, nil
 }
 
+// RegexpLexerDef describes RegexpLexer.
 type RegexpLexerDef struct {
 	Info
 	States map[RegexpLexerState][]RegexpLexerRule
@@ -96,12 +100,14 @@ func (r *regexpRule) String() string {
 	return fmt.Sprintf("rule{name=%q pattern=%q}", r.name, r.regexp.String())
 }
 
+// RegexpLexer provides lexer feature.
 type RegexpLexer struct {
-	Info   Info
+	info   Info
 	States map[RegexpLexerState][]*regexpRule
 	Debug  bool
 }
 
+// NewRegexpLexer creates RegexpLexer from RegexpLexerDef.
 func NewRegexpLexer(d *RegexpLexerDef) (*RegexpLexer, error) {
 	states := make(map[RegexpLexerState][]*regexpRule)
 	for s, r := range d.States {
@@ -111,13 +117,15 @@ func NewRegexpLexer(d *RegexpLexerDef) (*RegexpLexer, error) {
 		}
 		states[s] = rules
 	}
-	return &RegexpLexer{Info: d.Info, States: states}, nil
+	return &RegexpLexer{info: d.Info, States: states}, nil
 }
 
-func (l *RegexpLexer) GetInfo() Info {
-	return l.Info
+// Info returns lexer info.
+func (l *RegexpLexer) Info() Info {
+	return l.info
 }
 
+// ParseString parses string.
 func (l *RegexpLexer) ParseString(s string, e Emitter) error {
 	c := &regexpLexerContext{
 		lexer:      l,
@@ -129,15 +137,17 @@ func (l *RegexpLexer) ParseString(s string, e Emitter) error {
 	return c.parse(s)
 }
 
+// GetDebug returns current debug flag.
 func (l *RegexpLexer) GetDebug() bool {
 	return l.Debug
 }
 
+// SetDebug change debug flag.
 func (l *RegexpLexer) SetDebug(v bool) {
 	l.Debug = v
 }
 
-func (l *RegexpLexer) Rules(s RegexpLexerState) []*regexpRule {
+func (l *RegexpLexer) rules(s RegexpLexerState) []*regexpRule {
 	rules, ok := l.States[s]
 	if !ok {
 		return nil
@@ -208,7 +218,7 @@ func (c *regexpLexerContext) debugf(s string, a ...interface{}) {
 func (c *regexpLexerContext) parse(s string) error {
 ParseLoop:
 	for len(s) > 0 {
-		rules := c.lexer.Rules(c.currentState())
+		rules := c.lexer.rules(c.currentState())
 		if rules == nil {
 			return fmt.Errorf("unknown state: %v", c.currentState())
 		}

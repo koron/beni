@@ -4,7 +4,8 @@ import (
 	. "github.com/koron/beni/token"
 )
 
-var GO_INFO = Info{
+// Go lexer info.
+var goInfo = Info{
 	Name:        "go",
 	Aliases:     []string{"go", "golang"},
 	Filenames:   []string{"*.go"},
@@ -13,7 +14,7 @@ var GO_INFO = Info{
 }
 
 var (
-	GO_KEYWORDS = []string{
+	goKeywords = []string{
 		"break", "default", "func", "interface", "select",
 		"case", "defer", "go", "map", "struct",
 		"chan", "else", "goto", "package", "switch",
@@ -21,36 +22,36 @@ var (
 		"continue", "for", "import", "return", "var",
 	}
 
-	GO_OPERATORS = []string{
+	goOperators = []string{
 		"+=", "++", "+", "&^=", "&^", "&=", "&&", "&", "==", "=",
 		"!=", "!", "-=", "--", "-", "|=", "||", "|", "<=", "<-",
 		"<<=", "<<", "<", "*=", "*", "^=", "^", ">>=", ">>", ">=",
 		">", "/=", "/", ":=", "%", "%=", "...", ".", ":",
 	}
 
-	GO_SEPARATORS = []string{
+	goSeparators = []string{
 		"(", ")", "[", "]", "{", "}", ",", ";",
 	}
 
-	GO_TYPES = []string{
+	goTypes = []string{
 		"bool", "byte", "complex64", "complex128", "error",
 		"float32", "float64", "int8", "int16", "int32",
 		"int64", "int", "rune", "string", "uint8",
 		"uint16", "uint32", "uint64", "uintptr", "uint",
 	}
 
-	GO_CONSTANTS = []string{
+	goConstants = []string{
 		"true", "false", "iota", "nil",
 	}
 
-	GO_FUNCTIONS = []string{
+	goFunctions = []string{
 		"append", "cap", "close", "complex", "copy",
 		"delete", "imag", "len", "make", "new",
 		"panic", "print", "println", "real", "recover",
 	}
 )
 
-var GO_STATES = map[RegexpLexerState][]RegexpLexerRule{
+var goStates = map[RegexpLexerState][]RegexpLexerRule{
 	Root: []RegexpLexerRule{
 		// Comments
 		RegexpLexerRule{
@@ -67,22 +68,22 @@ var GO_STATES = map[RegexpLexerState][]RegexpLexerRule{
 		// Keywords
 		RegexpLexerRule{
 			Name:    "keyword",
-			Pattern: "^(?:" + regexpQuoteJoin(GO_KEYWORDS...) + ")\\b",
+			Pattern: "^(?:" + regexpQuoteJoin(goKeywords...) + ")\\b",
 			Action:  RegexpEmit(Keyword),
 		},
 		RegexpLexerRule{
 			Name:    "predeclared type",
-			Pattern: "^(?:" + regexpQuoteJoin(GO_TYPES...) + ")\\b",
+			Pattern: "^(?:" + regexpQuoteJoin(goTypes...) + ")\\b",
 			Action:  RegexpEmit(KeywordType),
 		},
 		RegexpLexerRule{
 			Name:    "predeclared function",
-			Pattern: "^(?:" + regexpQuoteJoin(GO_FUNCTIONS...) + ")\\b",
+			Pattern: "^(?:" + regexpQuoteJoin(goFunctions...) + ")\\b",
 			Action:  RegexpEmit(NameBuiltin),
 		},
 		RegexpLexerRule{
 			Name:    "predeclared constant",
-			Pattern: "^(?:" + regexpQuoteJoin(GO_CONSTANTS...) + ")\\b",
+			Pattern: "^(?:" + regexpQuoteJoin(goConstants...) + ")\\b",
 			Action:  RegexpEmit(NameConstant),
 		},
 
@@ -95,7 +96,7 @@ var GO_STATES = map[RegexpLexerState][]RegexpLexerRule{
 				`.\d+(?:[eE][+-]?\d+)?i`,
 				`\d+\.\d+(?:[eE][+-]?\d+)?i`,
 			) + ")",
-			Action:  RegexpEmit(LiteralNumber),
+			Action: RegexpEmit(LiteralNumber),
 		},
 
 		// Float literals
@@ -106,7 +107,7 @@ var GO_STATES = map[RegexpLexerState][]RegexpLexerRule{
 				`.\d+(?:[eE][+-]?\d+)?`,
 				`\d+\.\d+(?:[eE][+-]?\d+)?`,
 			) + ")",
-			Action:  RegexpEmit(LiteralNumber),
+			Action: RegexpEmit(LiteralNumber),
 		},
 
 		// Integer literals
@@ -143,12 +144,12 @@ var GO_STATES = map[RegexpLexerState][]RegexpLexerRule{
 		// Operators and separators
 		RegexpLexerRule{
 			Name:    "operator",
-			Pattern: "^(?:" + regexpQuoteJoin(GO_OPERATORS...) + ")",
+			Pattern: "^(?:" + regexpQuoteJoin(goOperators...) + ")",
 			Action:  RegexpEmit(Operator),
 		},
 		RegexpLexerRule{
 			Name:    "separator",
-			Pattern: "^(?:" + regexpQuoteJoin(GO_SEPARATORS...) + ")",
+			Pattern: "^(?:" + regexpQuoteJoin(goSeparators...) + ")",
 			Action:  RegexpEmit(Punctuation),
 		},
 
@@ -183,14 +184,15 @@ type goFactory struct {
 }
 
 func (f *goFactory) Info() Info {
-	return GO_INFO
+	return goInfo
 }
 
 func (f *goFactory) New() (Lexer, error) {
 	return NewRegexpLexer(&RegexpLexerDef{
-		Info:   GO_INFO,
-		States: GO_STATES,
+		Info:   goInfo,
+		States: goStates,
 	})
 }
 
+// Go lexer factory.
 var Go = &goFactory{}
