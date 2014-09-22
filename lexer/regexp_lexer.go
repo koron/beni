@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/koron/beni/token"
@@ -47,6 +48,7 @@ func RegexpEmitPop(t token.Code) RegexpAction {
 }
 
 type RegexpLexerRule struct {
+	Name    string
 	Pattern string
 	Action  RegexpAction
 }
@@ -56,7 +58,11 @@ func (r RegexpLexerRule) Convert() (*regexpRule, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, r.Pattern)
 	}
-	return &regexpRule{regexp: rx, action: r.Action}, nil
+	return &regexpRule{
+		name:   r.Name,
+		regexp: rx,
+		action: r.Action,
+	}, nil
 }
 
 func regexpConvertRules(src []RegexpLexerRule) ([]*regexpRule, error) {
@@ -77,6 +83,7 @@ type RegexpLexerDef struct {
 }
 
 type regexpRule struct {
+	name   string
 	regexp *regexp.Regexp
 	action RegexpAction
 }
@@ -86,7 +93,7 @@ func (r *regexpRule) match(s string) []string {
 }
 
 func (r *regexpRule) String() string {
-	return fmt.Sprintf("rule{pattern=%s}", r.regexp.String())
+	return fmt.Sprintf("rule{name=%q pattern=%q}", r.name, r.regexp.String())
 }
 
 type RegexpLexer struct {
@@ -218,6 +225,7 @@ ParseLoop:
 				return err
 			}
 			s = s[len(m[0]):]
+			//c.debugf("text=%q\n", s)
 			continue ParseLoop
 		}
 		// forward pointer if no rules matched.
@@ -227,4 +235,16 @@ ParseLoop:
 		s = s[n:]
 	}
 	return nil
+}
+
+func regexpJoin(words ...string) string {
+	return strings.Join(words, "|")
+}
+
+func regexpQuoteJoin(words ...string) string {
+	quoted := make([]string, len(words))
+	for i, v := range words {
+		quoted[i] = regexp.QuoteMeta(v)
+	}
+	return regexpJoin(quoted...)
 }

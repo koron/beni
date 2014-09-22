@@ -7,6 +7,9 @@ const (
 
 	JavaClass
 	JavaImport
+
+	GoRawString
+	GoInterpretedString
 )
 
 func (s RegexpLexerState) String() string {
