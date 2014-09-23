@@ -1,11 +1,12 @@
 package formatter
 
 import (
-	"github.com/koron/beni/theme"
-	"github.com/koron/beni/token"
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/koron/beni/theme"
+	"github.com/koron/beni/token"
 )
 
 var terminal256info = Info{

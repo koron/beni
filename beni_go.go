@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/koron/beni/formatter"
 	"github.com/koron/beni/lexer"
 	"github.com/koron/beni/theme"
 	"github.com/koron/beni/token"
-	"os"
 )
 
 type emitter struct {

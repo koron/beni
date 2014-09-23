@@ -1,9 +1,10 @@
 package formatter
 
 import (
+	"io"
+
 	"github.com/koron/beni/theme"
 	"github.com/koron/beni/token"
-	"io"
 )
 
 // Info is meta information of formatter.

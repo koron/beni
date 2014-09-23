@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"fmt"
+
 	. "github.com/koron/beni/token"
 )
 
@@ -12,7 +13,6 @@ var javaInfo = Info{
 	Mimetypes:   []string{"text/x-java"},
 	Description: "The Java programming language (java.com)",
 }
-
 
 var (
 	javaKeywords = []string{
