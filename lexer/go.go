@@ -6,9 +6,9 @@ import (
 
 // Go lexer info.
 var goInfo = Info{
-	Name:        "go",
+	Name:        "Go",
 	Aliases:     []string{"go", "golang"},
-	Filenames:   []string{"*.go"},
+	Filenames:   []string{`.*\.go`},
 	Mimetypes:   []string{"text/x-go", "application/x-go", "text/x-gosrc"},
 	Description: "The Go programming language (http://golang.org)",
 }

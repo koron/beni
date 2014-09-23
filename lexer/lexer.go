@@ -14,7 +14,7 @@ type Info struct {
 	Filenames      []string
 	AliasFilenames []string
 	Mimetypes      []string
-	Priority       int
+	Priority       int    // FIXME: not used yet
 	Description    string
 }
 

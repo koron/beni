@@ -9,7 +9,7 @@ import (
 var javaInfo = Info{
 	Name:        "Java",
 	Aliases:     []string{"java"},
-	Filenames:   []string{"*.java"},
+	Filenames:   []string{`.*\.java`},
 	Mimetypes:   []string{"text/x-java"},
 	Description: "The Java programming language (java.com)",
 }
