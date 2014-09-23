@@ -4,6 +4,7 @@ import (
 	"github.com/koron/beni/theme"
 	"github.com/koron/beni/token"
 	"io"
+	"strconv"
 	"strings"
 )
 
@@ -84,6 +85,8 @@ func (*terminal256Factory) New(t theme.Theme, w io.Writer) (Formatter, error) {
 			theme:  t,
 			writer: w,
 		},
+		colorCache:   make(map[int]int),
+		currentStyle: theme.Style{},
 	}, nil
 }
 
@@ -101,7 +104,7 @@ func (f *terminal256) Format(c token.Code, s string) error {
 		_, err = f.writer.Write([]byte(s))
 	} else {
 		f.writer.Write([]byte(ss))
-		r := strings.NewReplacer("\n", "\n" + ss)
+		r := strings.NewReplacer("\n", "\n"+ss)
 		_, err = r.WriteString(f.writer, s)
 		f.writer.Write([]byte(f.resetString()))
 	}
@@ -120,14 +123,14 @@ func (f *terminal256) colorIndex(c theme.Color) int {
 
 func (f *terminal256) colorIndexString(cc theme.ColorCode) string {
 	n := f.colorIndex(f.theme.GetColor(cc))
-	return string(n)
+	return strconv.Itoa(n)
 }
 
 func (f *terminal256) escapeString(d ...string) string {
 	if len(d) == 0 {
 		return ""
 	}
-	return "\027[" + strings.Join(d, ";") + "m"
+	return "\033[" + strings.Join(d, ";") + "m"
 }
 
 func (f *terminal256) resetString() string {

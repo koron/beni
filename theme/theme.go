@@ -49,7 +49,7 @@ func (t *Definition) GetName() string {
 func (t *Definition) GetStyle(tc token.Code) Style {
 	// FIXME: style cascading
 	s := t.findStyle(tc)
-	for s != nil {
+	for s == nil {
 		tc = tc.Parent()
 		if tc == 0 {
 			return Style{}
