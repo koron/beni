@@ -97,7 +97,12 @@ type terminal256 struct {
 	currentStyle theme.Style
 }
 
-func (f *terminal256) Format(c token.Code, s string) error {
+func (f *terminal256) Start() error {
+	// nothing todo.
+	return nil
+}
+
+func (f *terminal256) Emit(c token.Code, s string) error {
 	var err error
 	f.currentStyle = f.lookup(c)
 	ss := f.styleString()
@@ -110,6 +115,11 @@ func (f *terminal256) Format(c token.Code, s string) error {
 		f.writer.Write([]byte(f.resetString()))
 	}
 	return err
+}
+
+func (f *terminal256) End() error {
+	// nothing todo.
+	return nil
 }
 
 func (f *terminal256) colorIndex(c theme.Color) int {

@@ -7,16 +7,7 @@ import (
 	"github.com/koron/beni/formatter"
 	"github.com/koron/beni/lexer"
 	"github.com/koron/beni/theme"
-	"github.com/koron/beni/token"
 )
-
-type emitter struct {
-	formatter formatter.Formatter
-}
-
-func (e *emitter) Emit(c token.Code, s string) error {
-	return e.formatter.Format(c, s)
-}
 
 func parse(name string) error {
 	fmt.Println(name)
@@ -37,7 +28,17 @@ func parse(name string) error {
 		return err
 	}
 
-	return lexer.Parse(l, f, &emitter{formatter: t})
+	if err = t.Start(); err != nil {
+		return err
+	}
+	if err = lexer.Parse(l, f, t); err != nil {
+		return err
+	}
+	if err = t.End(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func main() {

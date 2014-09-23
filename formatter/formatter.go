@@ -23,7 +23,9 @@ type Factory interface {
 // Formatter format token stream.
 type Formatter interface {
 	Info() Info
-	Format(c token.Code, s string) error
+	Start() error
+	Emit(c token.Code, s string) error
+	End() error
 }
 
 type formatter struct {
