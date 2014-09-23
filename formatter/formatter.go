@@ -3,6 +3,7 @@ package formatter
 import (
 	"github.com/koron/beni/theme"
 	"github.com/koron/beni/token"
+	"io"
 )
 
 // Info is meta information of formatter.
@@ -15,7 +16,7 @@ type Info struct {
 // Factory for formatter.
 type Factory interface {
 	Info() Info
-	New(t theme.Theme) (Formatter, error)
+	New(t theme.Theme, w io.Writer) (Formatter, error)
 }
 
 // Formatter format token stream.
@@ -25,8 +26,9 @@ type Formatter interface {
 }
 
 type formatter struct {
-	info  Info
-	theme theme.Theme
+	info   Info
+	theme  theme.Theme
+	writer io.Writer
 }
 
 func (f *formatter) Info() Info {

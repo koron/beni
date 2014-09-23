@@ -3,6 +3,8 @@ package formatter
 import (
 	"github.com/koron/beni/theme"
 	"github.com/koron/beni/token"
+	"io"
+	"strings"
 )
 
 var terminal256info = Info{
@@ -75,27 +77,38 @@ func (*terminal256Factory) Info() Info {
 	return terminal256info
 }
 
-func (*terminal256Factory) New(t theme.Theme) (Formatter, error) {
+func (*terminal256Factory) New(t theme.Theme, w io.Writer) (Formatter, error) {
 	return &terminal256{
 		formatter: formatter{
-			info:  terminal256info,
-			theme: t,
+			info:   terminal256info,
+			theme:  t,
+			writer: w,
 		},
 	}, nil
 }
 
 type terminal256 struct {
 	formatter
-	colorCache map[int]int
+	colorCache   map[int]int
+	currentStyle theme.Style
 }
 
 func (f *terminal256) Format(c token.Code, s string) error {
-	_ = f.lookup(c)
-	// TODO:
-	return nil
+	var err error
+	f.currentStyle = f.lookup(c)
+	ss := f.styleString()
+	if len(ss) == 0 {
+		_, err = f.writer.Write([]byte(s))
+	} else {
+		f.writer.Write([]byte(ss))
+		r := strings.NewReplacer("\n", "\n" + ss)
+		_, err = r.WriteString(f.writer, s)
+		f.writer.Write([]byte(f.resetString()))
+	}
+	return err
 }
 
-func (f *terminal256) getColorIndex(c theme.Color) int {
+func (f *terminal256) colorIndex(c theme.Color) int {
 	cv := c.IntValue()
 	idx, ok := f.colorCache[cv]
 	if !ok {
@@ -103,6 +116,49 @@ func (f *terminal256) getColorIndex(c theme.Color) int {
 		f.colorCache[cv] = idx
 	}
 	return idx
+}
+
+func (f *terminal256) colorIndexString(cc theme.ColorCode) string {
+	n := f.colorIndex(f.theme.GetColor(cc))
+	return string(n)
+}
+
+func (f *terminal256) escapeString(d ...string) string {
+	if len(d) == 0 {
+		return ""
+	}
+	return "\027[" + strings.Join(d, ";") + "m"
+}
+
+func (f *terminal256) resetString() string {
+	attrs := make([]string, 0, 3)
+	if f.currentStyle.Fg != 0 {
+		attrs = append(attrs, "39")
+	}
+	if f.currentStyle.Bg != 0 {
+		attrs = append(attrs, "49")
+	}
+	if f.currentStyle.Bold || f.currentStyle.Italic {
+		attrs = append(attrs, "00")
+	}
+	return f.escapeString(attrs...)
+}
+
+func (f *terminal256) styleString() string {
+	attrs := make([]string, 0, 8)
+	if fg := f.currentStyle.Fg; fg != 0 {
+		attrs = append(attrs, "38", "5", f.colorIndexString(fg))
+	}
+	if bg := f.currentStyle.Bg; bg != 0 {
+		attrs = append(attrs, "48", "5", f.colorIndexString(bg))
+	}
+	if f.currentStyle.Bold {
+		attrs = append(attrs, "01")
+	}
+	if f.currentStyle.Italic {
+		attrs = append(attrs, "04")
+	}
+	return f.escapeString(attrs...)
 }
 
 // Terminal256 formatter factory.

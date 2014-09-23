@@ -20,9 +20,10 @@ type ColorCode int32
 
 // Style indicates hightlight style for syntax elements.
 type Style struct {
-	Fg   ColorCode
-	Bg   ColorCode
-	Bold bool
+	Fg     ColorCode
+	Bg     ColorCode
+	Bold   bool
+	Italic bool
 }
 
 // Theme interface.
