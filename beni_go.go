@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/koron/beni/formatter"
@@ -10,7 +9,6 @@ import (
 )
 
 func parse(name string) error {
-	fmt.Println(name)
 	f, err := os.Open(name)
 	if err != nil {
 		return err
@@ -23,6 +21,7 @@ func parse(name string) error {
 		return err
 	}
 
+	//t, err := formatter.HTML.New(theme.Base16, os.Stdout)
 	t, err := formatter.Terminal256.New(theme.Base16, os.Stdout)
 	if err != nil {
 		return err
