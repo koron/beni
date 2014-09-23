@@ -7,8 +7,8 @@ import (
 
 // Info is meta information of formatter.
 type Info struct {
-	Name    string
-	Aliases []string
+	Name      string
+	Aliases   []string
 	Filenames []string
 }
 
@@ -22,4 +22,17 @@ type Factory interface {
 type Formatter interface {
 	Info() Info
 	Format(c token.Code, s string) error
+}
+
+type formatter struct {
+	info  Info
+	theme theme.Theme
+}
+
+func (f *formatter) Info() Info {
+	return f.info
+}
+
+func (f *formatter) lookup(c token.Code) theme.Style {
+	return f.theme.GetStyle(c)
 }

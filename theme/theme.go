@@ -11,7 +11,11 @@ type Color struct {
 	Blue  uint8
 }
 
-// ColorCode is index of color pallet. 
+func (c Color) IntValue() int {
+	return (int(c.Red) << 16) + (int(c.Green) << 8) + int(c.Blue)
+}
+
+// ColorCode is index of color pallet.
 type ColorCode int32
 
 // Style indicates hightlight style for syntax elements.
