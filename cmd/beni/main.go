@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/mattn/go-colorable"
 	"github.com/koron/beni/formatter"
 	"github.com/koron/beni/lexer"
 	"github.com/koron/beni/theme"
@@ -51,9 +50,8 @@ func run(filenames []string, o CLOptions) error {
 		Formatter: o.Formatter,
 		Theme:     o.Theme,
 	}
-	out := colorable.NewColorableStdout()
 	for _, name := range filenames {
-		if err := Highlight(name, out, ho); err != nil {
+		if err := Highlight(name, getStdoutWriter(), ho); err != nil {
 			return err
 		}
 	}
