@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 
+	"github.com/koron/beni"
 	"github.com/koron/beni/formatter"
 	"github.com/koron/beni/lexer"
 	"github.com/koron/beni/theme"
@@ -44,14 +46,21 @@ Usage: beni [OPTIONS] [FILES...]`)
 	os.Exit(0)
 }
 
-func run(filenames []string, o CLOptions) error {
-	ho := HighlightOptions{
-		Lexer:     o.Lexer,
-		Formatter: o.Formatter,
-		Theme:     o.Theme,
+func convert(filename string, w io.Writer, lexer, theme, format string) error {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
 	}
+	defer f.Close()
+	if lexer == "" {
+		lexer = filename
+	}
+	return beni.Highlight(f, w, lexer, theme, format)
+}
+
+func run(filenames []string, o CLOptions) error {
 	for _, name := range filenames {
-		if err := Highlight(name, getStdoutWriter(), ho); err != nil {
+		if err := convert(name, getStdoutWriter(), o.Lexer, o.Theme, o.Formatter); err != nil {
 			return err
 		}
 	}

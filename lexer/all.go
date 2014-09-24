@@ -3,6 +3,7 @@ package lexer
 import (
 	"log"
 	"regexp"
+	"strings"
 )
 
 // All factories.
@@ -10,6 +11,8 @@ var All = []Factory{
 	Go,
 	Java,
 }
+
+var table map[string]Factory
 
 func matchFilename(t, p string) bool {
 	matched, err := regexp.MatchString(p, t)
@@ -34,12 +37,27 @@ func matchByFilenames(s string, n Info) bool {
 	return false
 }
 
-// Find returns matched Theme.
-func Find(s string) Factory {
+// FindByFilename returns a factory which matched with filename.
+func FindByFilename(s string) Factory {
 	for _, f := range All {
 		if matchByFilenames(s, f.Info()) {
 			return f
 		}
 	}
 	return nil
+}
+
+// Find returns matched Theme.
+func Find(lexerOrFileName string) Factory {
+	if table == nil {
+		table = make(map[string]Factory)
+		for _, f := range All {
+			table[strings.ToLower(f.Info().Name)] = f
+		}
+	}
+	f, ok := table[strings.ToLower(lexerOrFileName)]
+	if !ok {
+		return FindByFilename(lexerOrFileName)
+	}
+	return f
 }
