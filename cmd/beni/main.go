@@ -7,6 +7,9 @@ import (
 	"os"
 
 	"github.com/mattn/go-colorable"
+	"github.com/koron/beni/formatter"
+	"github.com/koron/beni/lexer"
+	"github.com/koron/beni/theme"
 )
 
 // CLOptions has command line options
@@ -24,6 +27,21 @@ func usage() {
 
 Usage: beni [OPTIONS] [FILES...]`)
 	flag.PrintDefaults()
+	fmt.Println(`
+  Formatters:`)
+	for _, v := range formatter.All {
+		fmt.Println("    " + v.Info().Name)
+	}
+	fmt.Println(`
+  Languages:`)
+	for _, v := range lexer.All {
+		fmt.Println("    " + v.Info().Name)
+	}
+	fmt.Println(`
+  Themes:`)
+	for _, v := range theme.All {
+		fmt.Println("    " + v.GetName())
+	}
 	os.Exit(0)
 }
 
