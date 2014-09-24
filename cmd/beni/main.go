@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/mattn/go-colorable"
 )
 
 // CLOptions has command line options
@@ -31,8 +33,9 @@ func run(filenames []string, o CLOptions) error {
 		Formatter: o.Formatter,
 		Theme:     o.Theme,
 	}
+	out := colorable.NewColorableStdout()
 	for _, name := range filenames {
-		if err := Highlight(name, os.Stdout, ho); err != nil {
+		if err := Highlight(name, out, ho); err != nil {
 			return err
 		}
 	}
