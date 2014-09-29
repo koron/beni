@@ -258,3 +258,11 @@ func regexpQuoteJoin(words ...string) string {
 	}
 	return regexpJoin(quoted...)
 }
+
+func regexpKeywordsPattern(words ...string) string {
+	return "^(?:" + regexpJoin(words...) + ")\\b"
+}
+
+func regexpSymbolicsPattern(symbols ...string) string {
+	return "^(?:" + regexpQuoteJoin(symbols...) + ")"
+}

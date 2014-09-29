@@ -68,22 +68,22 @@ var goStates = map[RegexpLexerState][]RegexpLexerRule{
 		// Keywords
 		RegexpLexerRule{
 			Name:    "keyword",
-			Pattern: "^(?:" + regexpQuoteJoin(goKeywords...) + ")\\b",
+			Pattern: regexpKeywordsPattern(goKeywords...),
 			Action:  RegexpEmit(Keyword),
 		},
 		RegexpLexerRule{
 			Name:    "predeclared type",
-			Pattern: "^(?:" + regexpQuoteJoin(goTypes...) + ")\\b",
+			Pattern: regexpKeywordsPattern(goTypes...),
 			Action:  RegexpEmit(KeywordType),
 		},
 		RegexpLexerRule{
 			Name:    "predeclared function",
-			Pattern: "^(?:" + regexpQuoteJoin(goFunctions...) + ")\\b",
+			Pattern: regexpKeywordsPattern(goFunctions...),
 			Action:  RegexpEmit(NameBuiltin),
 		},
 		RegexpLexerRule{
 			Name:    "predeclared constant",
-			Pattern: "^(?:" + regexpQuoteJoin(goConstants...) + ")\\b",
+			Pattern: regexpKeywordsPattern(goConstants...),
 			Action:  RegexpEmit(NameConstant),
 		},
 
@@ -144,12 +144,12 @@ var goStates = map[RegexpLexerState][]RegexpLexerRule{
 		// Operators and separators
 		RegexpLexerRule{
 			Name:    "operator",
-			Pattern: "^(?:" + regexpQuoteJoin(goOperators...) + ")",
+			Pattern: regexpSymbolicsPattern(goOperators...),
 			Action:  RegexpEmit(Operator),
 		},
 		RegexpLexerRule{
 			Name:    "separator",
-			Pattern: "^(?:" + regexpQuoteJoin(goSeparators...) + ")",
+			Pattern: regexpSymbolicsPattern(goSeparators...),
 			Action:  RegexpEmit(Punctuation),
 		},
 
