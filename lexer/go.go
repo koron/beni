@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	. "github.com/koron/beni/token"
+	t "github.com/koron/beni/token"
 )
 
 // Go lexer info.
@@ -57,34 +57,34 @@ var goStates = map[RegexpLexerState][]RegexpLexerRule{
 		RegexpLexerRule{
 			Name:    "line comment",
 			Pattern: "^//[^\\n]*",
-			Action:  RegexpEmit(Comment),
+			Action:  RegexpEmit(t.Comment),
 		},
 		RegexpLexerRule{
 			Name:    "general comment",
 			Pattern: "^(?s:/\\*.*?\\*/)",
-			Action:  RegexpEmit(Comment),
+			Action:  RegexpEmit(t.Comment),
 		},
 
 		// Keywords
 		RegexpLexerRule{
 			Name:    "keyword",
 			Pattern: regexpKeywordsPattern(goKeywords...),
-			Action:  RegexpEmit(Keyword),
+			Action:  RegexpEmit(t.Keyword),
 		},
 		RegexpLexerRule{
 			Name:    "predeclared type",
 			Pattern: regexpKeywordsPattern(goTypes...),
-			Action:  RegexpEmit(KeywordType),
+			Action:  RegexpEmit(t.KeywordType),
 		},
 		RegexpLexerRule{
 			Name:    "predeclared function",
 			Pattern: regexpKeywordsPattern(goFunctions...),
-			Action:  RegexpEmit(NameBuiltin),
+			Action:  RegexpEmit(t.NameBuiltin),
 		},
 		RegexpLexerRule{
 			Name:    "predeclared constant",
 			Pattern: regexpKeywordsPattern(goConstants...),
-			Action:  RegexpEmit(NameConstant),
+			Action:  RegexpEmit(t.NameConstant),
 		},
 
 		// Literals (except strings)
@@ -96,7 +96,7 @@ var goStates = map[RegexpLexerState][]RegexpLexerRule{
 				`.\d+(?:[eE][+-]?\d+)?i`,
 				`\d+\.\d+(?:[eE][+-]?\d+)?i`,
 			) + ")",
-			Action: RegexpEmit(LiteralNumber),
+			Action: RegexpEmit(t.LiteralNumber),
 		},
 
 		// Float literals
@@ -107,24 +107,24 @@ var goStates = map[RegexpLexerState][]RegexpLexerRule{
 				`.\d+(?:[eE][+-]?\d+)?`,
 				`\d+\.\d+(?:[eE][+-]?\d+)?`,
 			) + ")",
-			Action: RegexpEmit(LiteralNumber),
+			Action: RegexpEmit(t.LiteralNumber),
 		},
 
 		// Integer literals
 		RegexpLexerRule{
 			Name:    "octal lit",
 			Pattern: "^0[0-7]+",
-			Action:  RegexpEmit(LiteralNumberHex),
+			Action:  RegexpEmit(t.LiteralNumberHex),
 		},
 		RegexpLexerRule{
 			Name:    "hex lit",
 			Pattern: "^0[xX][[:xdigit:]]+",
-			Action:  RegexpEmit(LiteralNumberHex),
+			Action:  RegexpEmit(t.LiteralNumberHex),
 		},
 		RegexpLexerRule{
 			Name:    "decimal lit",
 			Pattern: "^(?:0|[1-9]\\d*)",
-			Action:  RegexpEmit(LiteralNumberInteger),
+			Action:  RegexpEmit(t.LiteralNumberInteger),
 		},
 
 		// Character literal
@@ -138,44 +138,44 @@ var goStates = map[RegexpLexerState][]RegexpLexerRule{
 				"\\\\[0-7]{3}",
 				"[^\\\\]",
 			) + ")'",
-			Action: RegexpEmit(LiteralStringChar),
+			Action: RegexpEmit(t.LiteralStringChar),
 		},
 
 		// Operators and separators
 		RegexpLexerRule{
 			Name:    "operator",
 			Pattern: regexpSymbolicsPattern(goOperators...),
-			Action:  RegexpEmit(Operator),
+			Action:  RegexpEmit(t.Operator),
 		},
 		RegexpLexerRule{
 			Name:    "separator",
 			Pattern: regexpSymbolicsPattern(goSeparators...),
-			Action:  RegexpEmit(Punctuation),
+			Action:  RegexpEmit(t.Punctuation),
 		},
 
 		// Identifiers
 		RegexpLexerRule{
 			Name:    "identifier",
 			Pattern: "^[\\pL][\\pL\\d_]*",
-			Action:  RegexpEmit(Name),
+			Action:  RegexpEmit(t.Name),
 		},
 
 		// Strings
 		RegexpLexerRule{
 			Name:    "raw string lit",
 			Pattern: "^(?s:`[^`]*`)",
-			Action:  RegexpEmit(LiteralString),
+			Action:  RegexpEmit(t.LiteralString),
 		},
 		RegexpLexerRule{
 			Name:    "interpreted string lit",
 			Pattern: `^"(?:\\\\|\\"|[^"])*"`,
-			Action:  RegexpEmit(LiteralString),
+			Action:  RegexpEmit(t.LiteralString),
 		},
 
 		// Others
 		RegexpLexerRule{
 			Pattern: "^\\s+",
-			Action:  RegexpEmit(Other),
+			Action:  RegexpEmit(t.Other),
 		},
 	},
 }
