@@ -9,3 +9,5 @@ tags:
 clean:
 	rm -f beni beni.exe
 	rm -f tags
+
+.PHONY: tags
