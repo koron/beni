@@ -71,15 +71,15 @@ var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 			Action:  RegexpEmit(t.NameDecorator),
 		},
 		RegexpLexerRule{
-			Pattern: "^(?:" + regexpJoin(javaKeywords...) + ")\\b",
+			Pattern: regexpKeywordsPattern(javaKeywords...),
 			Action:  RegexpEmit(t.Keyword),
 		},
 		RegexpLexerRule{
-			Pattern: "^(?:" + regexpJoin(javaDeclarations...) + ")\\b",
+			Pattern: regexpKeywordsPattern(javaDeclarations...),
 			Action:  RegexpEmit(t.KeywordDeclaration),
 		},
 		RegexpLexerRule{
-			Pattern: "^(?:" + regexpJoin(javaTypes...) + ")\\b",
+			Pattern: regexpKeywordsPattern(javaTypes...),
 			Action:  RegexpEmit(t.KeywordType),
 		},
 		RegexpLexerRule{

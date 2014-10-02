@@ -9,6 +9,11 @@ func (c Code) Name() string {
 	return s
 }
 
+// String returns name of the token.
+func (c Code) String() string {
+	return c.Name()
+}
+
 // ShortName returns short name of the token.
 func (c Code) ShortName() string {
 	s, _ := ToShortName(c)
