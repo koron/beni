@@ -63,17 +63,21 @@ func parseCheck(t *testing.T, f Factory, s string, tokens []interface{},
 			if j < min {
 				t.Errorf("not match at #%d: expected=(%s %#v) actual=(%s %#v)",
 					i, tokens[i], tokens[j], r.Tokens[i], r.Tokens[j])
+				i += 2
+				break
 			} else {
 				t.Errorf("not match at #%d: expected=(%s) actual=(%s)",
 					i, tokens[i], r.Tokens[i])
+				i += 2
+				break
 			}
 		}
 	}
 	if len_act > len_exp {
 		if i+1 < len_act {
-			t.Logf("next token was (%s %#v)", r.Tokens[i], r.Tokens[i+1])
+			t.Logf("next token is (%s %#v)", r.Tokens[i], r.Tokens[i+1])
 		} else {
-			t.Logf("next token was (%s)", r.Tokens[i])
+			t.Logf("next token is (%s)", r.Tokens[i])
 		}
 	}
 }

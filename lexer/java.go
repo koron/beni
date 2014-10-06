@@ -57,13 +57,13 @@ var javaStates = map[RegexpLexerState][]RegexpLexerRule{
 				return c.Emit(t.Punctuation, groups[4])
 			},
 		},
-		RegexpLexerRule{Pattern: "^\\s+", Action: RegexpEmit(t.Text)},
+		RegexpLexerRule{Pattern: `^\s+`, Action: RegexpEmit(t.Text)},
 		RegexpLexerRule{
 			Pattern: "^//.*?$",
 			Action:  RegexpEmit(t.CommentSingle),
 		},
 		RegexpLexerRule{
-			Pattern: "^(?s:/\\*.*?\\*/)",
+			Pattern: `^(?s:/\*.*?\*/)`,
 			Action:  RegexpEmit(t.CommentMultiline),
 		},
 		RegexpLexerRule{
