@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -67,15 +68,45 @@ func run(filenames []string, o CLOptions) error {
 	return nil
 }
 
+func convertStdIn(o CLOptions) {
+	lexer := o.Lexer
+	theme := o.Theme
+	format := o.Formatter
+
+	if lexer == "" {
+		lexer = "Go"
+	}
+
+	if theme == "" {
+		theme = "base16"
+	}
+
+	if format == "" {
+		format = "Terminal256"
+	}
+
+	stdin := bufio.NewReader(os.Stdin)
+	stdout := bufio.NewWriter(os.Stdout)
+	defer stdout.Flush()
+
+	beni.Highlight(stdin, stdout, lexer, theme, format)
+	return
+}
+
 func main() {
 	flag.BoolVar(&options.Help, "h", false, "show help message")
 	flag.StringVar(&options.Lexer, "l", "", "force lexer")
 	flag.StringVar(&options.Formatter, "f", "Terminal256", "choose formatter")
-	flag.StringVar(&options.Theme, "t", "base16", "choose formatter")
+	flag.StringVar(&options.Theme, "t", "base16", "choose theme")
 	flag.Parse()
 
-	if options.Help || flag.NArg() == 0 {
+	if options.Help {
 		usage()
+		return
+	}
+
+	if flag.NArg() == 0 {
+		convertStdIn(options)
 		return
 	}
 
